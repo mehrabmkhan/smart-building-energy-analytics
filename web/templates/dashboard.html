@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PowerSight Analytics</title>
+  <style>
+    :root { font-family: Arial, sans-serif; color: #20231f; background: #f4f5ef; }
+    body { margin: 0; background: #f4f5ef; }
+    header { background: #112f35; color: #fff; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #4ca66a; }
+    h1, h2 { margin: 0 0 10px; }
+    nav { display: flex; flex-wrap: wrap; gap: 8px; }
+    nav a, .button { color: #fff; background: #18434b; border: 1px solid #54727a; border-radius: 6px; padding: 8px 10px; text-decoration: none; }
+    main { padding: 22px; max-width: 1440px; margin: 0 auto; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+    .panel { background: #fff; border: 1px solid #d7ddcf; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    .metric { color: #112f35; font-size: 30px; font-weight: 700; }
+    .label { color: #607064; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border-bottom: 1px solid #d7ddcf; padding: 9px; text-align: left; }
+    th { color: #40554a; }
+    .good { color: #187a45; font-weight: 700; }
+    .warn { color: #9a6700; font-weight: 700; }
+    .crit { color: #b42318; font-weight: 700; }
+    .chart { width: 100%; height: 150px; border: 1px solid #d7ddcf; background: #fbfcf8; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div><h1>PowerSight Analytics</h1><div>Smart Building Energy Analytics & Power Quality Platform</div></div>
+    <nav><a href="#overview">Overview</a><a href="#meters">Meters</a><a href="#quality">Power Quality</a><a href="#anomalies">Anomalies</a><a href="#health">System Health</a><a href="/docs">API</a></nav>
+  </header>
+  <main>
+    <section id="overview" class="grid">
+      <div class="panel"><div class="label">Current Demand</div><div class="metric">{{ analytics.current_demand_kw }} kW</div></div>
+      <div class="panel"><div class="label">Today's Energy</div><div class="metric">{{ analytics.today_energy_kwh }} kWh</div></div>
+      <div class="panel"><div class="label">Peak Demand</div><div class="metric">{{ analytics.peak_demand_kw }} kW</div></div>
+      <div class="panel"><div class="label">Average PF</div><div class="metric">{{ analytics.average_pf }}</div></div>
+      <div class="panel"><div class="label">Meters Online</div><div class="metric">{{ analytics.meters_online }}</div></div>
+      <div class="panel"><div class="label">Active Alerts</div><div class="metric">{{ alerts|length }}</div></div>
+    </section>
+
+    <section class="panel">
+      <h2>24-Hour Load Curve</h2>
+      <svg class="chart" viewBox="0 0 800 150" preserveAspectRatio="none">
+      {% for row in rows %}
+        {% if loop.index0 > 0 %}
+        {% set prev = rows[loop.index0 - 1] %}
+        <line x1="{{ (loop.index0 - 1) * 800 / (rows|length if rows|length > 1 else 1) }}" y1="{{ 135 - ((prev.power_kw or 0) / 650 * 120) }}" x2="{{ loop.index0 * 800 / (rows|length if rows|length > 1 else 1) }}" y2="{{ 135 - ((row.power_kw or 0) / 650 * 120) }}" stroke="#4ca66a" stroke-width="2" />
+        {% endif %}
+      {% endfor %}
+      </svg>
+    </section>
+
+    <section id="meters" class="panel">
+      <h2>Live Energy By Meter</h2>
+      <table><thead><tr><th>Meter</th><th>Category</th><th>kW</th><th>kVA</th><th>PF</th><th>Voltage</th><th>Frequency</th><th>Energy</th></tr></thead><tbody>
+      {% for row in latest %}
+        <tr><td>{{ row.meter_name }}</td><td>{{ row.category }}</td><td>{{ row.power_kw }}</td><td>{{ row.apparent_kva }}</td><td>{{ row.power_factor }}</td><td>{{ row.voltage }}</td><td>{{ row.frequency }}</td><td>{{ row.energy_kwh }}</td></tr>
+      {% endfor %}
+      </tbody></table>
+    </section>
+
+    <section id="quality" class="panel">
+      <h2>Power Quality Indicators</h2>
+      <table><thead><tr><th>Alert</th><th>Meter</th><th>Severity</th><th>Value</th><th>Status</th><th>Reason</th></tr></thead><tbody>
+      {% for alert in alerts %}
+        <tr><td>{{ alert.alert_type }}</td><td>{{ alert.meter_id }}</td><td>{{ alert.severity }}</td><td>{{ alert.value }}</td><td>{{ alert.status }}</td><td>{{ alert.reason }}</td></tr>
+      {% else %}<tr><td colspan="6">No recent alerts.</td></tr>{% endfor %}
+      </tbody></table>
+    </section>
+
+    <section id="anomalies" class="panel">
+      <h2>Anomalies & Insights</h2>
+      <div class="grid">
+        <div><h3>Anomaly Timeline</h3><table><tbody>{% for item in anomalies %}<tr><td>{{ item.meter }}</td><td>{{ item.score }}</td><td>{{ item.reason }}</td></tr>{% else %}<tr><td>No current anomalies.</td></tr>{% endfor %}</tbody></table></div>
+        <div><h3>Rule-Based Observations</h3><ul>{% for item in observations %}<li>{{ item }}</li>{% endfor %}</ul><a class="button" href="/reports/daily.html">Download Daily Report</a></div>
+      </div>
+    </section>
+
+    <section id="health" class="panel">
+      <h2>System Health</h2>
+      <table><tbody>
+        <tr><th>Modbus Devices</th><td class="good">{{ health.modbus_devices }}</td><th>MQTT Broker</th><td class="good">{{ health.mqtt_broker }}</td></tr>
+        <tr><th>Processor</th><td class="good">{{ health.telemetry_processor }}</td><th>Database</th><td class="good">{{ health.database }}</td></tr>
+        <tr><th>Published</th><td>{{ health.published_messages }}</td><th>Consumed</th><td>{{ health.consumed_messages }}</td></tr>
+        <tr><th>Failed Messages</th><td>{{ health.failed_messages }}</td><th>Last Message</th><td>{{ health.last_message }}</td></tr>
+      </tbody></table>
+    </section>
+  </main>
+</body>
+</html>

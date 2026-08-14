@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>PowerSight Daily Energy Report</title>
+<style>body{font-family:Arial,sans-serif;margin:32px;color:#20231f}table{border-collapse:collapse;width:100%}td,th{border:1px solid #d7ddcf;padding:8px;text-align:left}h1,h2{color:#112f35}</style></head>
+<body>
+<h1>PowerSight Daily Energy Report</h1>
+<h2>Summary</h2>
+<p>Total current demand: {{ analytics.current_demand_kw }} kW. Peak observed demand: {{ analytics.peak_demand_kw }} kW. Average power factor: {{ analytics.average_pf }}.</p>
+<h2>Energy By Subsystem</h2>
+<table><thead><tr><th>Meter</th><th>Category</th><th>Current kW</th><th>Energy kWh</th></tr></thead><tbody>
+{% for item in analytics.energy_by_meter %}<tr><td>{{ item.meter_name }}</td><td>{{ item.category }}</td><td>{{ item.power_kw }}</td><td>{{ item.energy_kwh }}</td></tr>{% endfor %}
+</tbody></table>
+<h2>Anomalies</h2>
+<ul>{% for item in anomalies %}<li>{{ item.meter }}: {{ item.reason }}</li>{% else %}<li>No current anomalies.</li>{% endfor %}</ul>
+<h2>Alerts</h2>
+<ul>{% for item in alerts %}<li>{{ item.severity }} {{ item.alert_type }} on {{ item.meter_id }}: {{ item.reason }}</li>{% else %}<li>No recent alerts.</li>{% endfor %}</ul>
+<h2>Observations</h2>
+<ul>{% for item in observations %}<li>{{ item }}</li>{% endfor %}</ul>
+<p>This is a synthetic smart-building demo. It does not claim connection to physical equipment.</p>
+</body></html>

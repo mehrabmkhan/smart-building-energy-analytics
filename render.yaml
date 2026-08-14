@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: smart-building-energy-analytics
+    runtime: docker
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: POWERSIGHT_DB
+        value: /app/data/powersight.db

@@ -1,0 +1,38 @@
+building_id: demo-building
+meters:
+  - id: main-service
+    name: Main Service
+    category: main
+    base_kw: 280
+    peak_kw: 620
+    power_factor: 0.94
+  - id: hvac
+    name: HVAC
+    category: hvac
+    base_kw: 40
+    peak_kw: 260
+    power_factor: 0.90
+  - id: lighting
+    name: Lighting
+    category: lighting
+    base_kw: 18
+    peak_kw: 95
+    power_factor: 0.96
+  - id: server-room
+    name: Server Room
+    category: data center
+    base_kw: 75
+    peak_kw: 105
+    power_factor: 0.98
+  - id: production
+    name: Production Equipment
+    category: equipment
+    base_kw: 30
+    peak_kw: 210
+    power_factor: 0.88
+  - id: tenant-floor
+    name: Tenant Floor
+    category: tenant
+    base_kw: 20
+    peak_kw: 130
+    power_factor: 0.95

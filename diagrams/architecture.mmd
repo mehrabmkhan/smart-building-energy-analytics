@@ -1,0 +1,9 @@
+flowchart LR
+    Simulator["Multiple Simulated Meters"] --> Modbus["Modbus Collection Layer"]
+    Modbus --> MQTT["MQTT Topic Bus"]
+    MQTT --> Processor["Telemetry Processor"]
+    Processor --> Store["Time-Series Store"]
+    Store --> Analytics["Analytics Engine"]
+    Analytics --> Alerts["Alerts & Anomalies"]
+    Alerts --> Dashboard["FastAPI Dashboard"]
+    Analytics --> Reports["Daily Reports"]
