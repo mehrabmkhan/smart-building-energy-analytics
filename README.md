@@ -8,7 +8,7 @@ The project uses synthetic data only. It does not claim communication with physi
 
 ## Live Demo
 
-Live demo: deployment pending.
+Live demo: <https://smart-building-energy-analytics.onrender.com>
 
 ## Screenshots
 
